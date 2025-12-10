@@ -139,6 +139,7 @@ function calculateDiscounts() {
     const inputData = {
         currentTime: parseInt(document.getElementById('current-time').value),
         currentSales: parseInt(document.getElementById('current-sales').value),
+        existingDiscount: parseInt(document.getElementById('existing-discount').value) || 0,
         weather: document.querySelector('input[name="weather"]:checked').value,
         dayOfWeek: document.getElementById('day-of-week').value,
         inventory: inventoryItems
@@ -152,7 +153,7 @@ function calculateDiscounts() {
 }
 
 function suggestDiscounts(inputData, productData) {
-    const { currentTime, weather, dayOfWeek, inventory } = inputData;
+    const { currentTime, weather, dayOfWeek, inventory, existingDiscount } = inputData;
     
     // 営業時間の定義
     const CLOSING_TIME = 21; // 21時閉店
@@ -190,40 +191,45 @@ function suggestDiscounts(inputData, productData) {
         
         let discountRate = 0;
         
-        // A. 基本となる時間と金額による値下げルール
-        if (price >= 700) {
-            // 700円以上の商品
-            if (currentTime >= 18 && quantity >= 8) {
-                discountRate = 30;
+        // 工場作成製品の特別ルール（在庫数・原価率無視）
+        if (isFactory) {
+            if (currentTime >= 20) {
+                discountRate = 50; // 20時以降: 50%
+            } else if (currentTime >= 19) {
+                discountRate = 30; // 19時以降: 30%
+            } else if (currentTime >= 18) {
+                discountRate = 20; // 18時以降: 20%
             }
-            if (currentTime >= 20 && quantity >= 5) {
-                discountRate = 50;
+        } else {
+            // A. 基本となる時間と金額による値下げルール（店舗作成品のみ）
+            if (price >= 700) {
+                // 700円以上の商品
+                if (currentTime >= 18 && quantity >= 8) {
+                    discountRate = 30;
+                }
+                if (currentTime >= 20 && quantity >= 5) {
+                    discountRate = 50;
+                }
+            } else if (price >= 500) {
+                // 500〜699円
+                if (currentTime >= 18 && quantity >= 8) {
+                    discountRate = 20;
+                }
+                if (currentTime >= 19 && quantity >= 5) {
+                    discountRate = 30;
+                }
+            } else if (price >= 300) {
+                // 300〜499円
+                if (currentTime >= 18 && quantity >= 10) {
+                    discountRate = 10;
+                }
+                if (currentTime >= 19 && quantity >= 7) {
+                    discountRate = 20;
+                }
+                if (currentTime >= 20 && quantity >= 5) {
+                    discountRate = 30;
+                }
             }
-        } else if (price >= 500) {
-            // 500〜699円
-            if (currentTime >= 18 && quantity >= 8) {
-                discountRate = 20;
-            }
-            if (currentTime >= 19 && quantity >= 5) {
-                discountRate = 30;
-            }
-        } else if (price >= 300) {
-            // 300〜499円
-            if (currentTime >= 18 && quantity >= 10) {
-                discountRate = 10;
-            }
-            if (currentTime >= 19 && quantity >= 7) {
-                discountRate = 20;
-            }
-            if (currentTime >= 20 && quantity >= 5) {
-                discountRate = 30;
-            }
-        }
-        
-        // 弁当(工場作成)の特別ルール: 20時30分以降(ここでは20.5時として扱う)
-        // 簡略化のため、20時以降で工場作成品はすべて50%オフとする
-        if (isFactory && currentTime >= 20 && quantity >= 1) {
-            discountRate = 50;
         }
         
         // B. 例外処理(値下げをしない条件)
@@ -281,16 +287,20 @@ function suggestDiscounts(inputData, productData) {
     // 提案値下げ額の合計
     const totalDiscountAmount = proposals.reduce((sum, p) => sum + p.discountAmount, 0);
     
-    // D. 警告メッセージの判定
-    // 廃棄金額は考慮しないため、値下げ額のみで判定
-    const discountPercentage = (totalDiscountAmount / salesTarget) * 100;
+    // 合計値下げ額（既存 + 提案）
+    const totalAllDiscounts = existingDiscount + totalDiscountAmount;
+    
+    // D. 警告メッセージの判定（合計値下げ額で判定）
+    const discountPercentage = (totalAllDiscounts / salesTarget) * 100;
     const showWarning = discountPercentage > 8;
     
     return {
         proposals: proposals,
         salesTarget: salesTarget,
         inventoryTotal: inventoryTotal,
+        existingDiscount: existingDiscount,
         totalDiscountAmount: totalDiscountAmount,
+        totalAllDiscounts: totalAllDiscounts,
         showWarning: showWarning
     };
 }
@@ -300,7 +310,9 @@ function displayResults(result, inputData) {
     const resultSection = document.getElementById('result-section');
     const salesTargetEl = document.getElementById('sales-target');
     const inventoryTotalEl = document.getElementById('inventory-total');
+    const existingDiscountDisplayEl = document.getElementById('existing-discount-display');
     const discountTotalEl = document.getElementById('discount-total');
+    const totalDiscountAmountEl = document.getElementById('total-discount-amount');
     const warningMessageEl = document.getElementById('warning-message');
     const proposalsListEl = document.getElementById('proposals-list');
     
@@ -310,11 +322,18 @@ function displayResults(result, inputData) {
     // 合計情報の表示
     salesTargetEl.textContent = `¥${result.salesTarget.toLocaleString()}`;
     inventoryTotalEl.textContent = `¥${result.inventoryTotal.toLocaleString()}`;
+    existingDiscountDisplayEl.textContent = `¥${result.existingDiscount.toLocaleString()}`;
     discountTotalEl.textContent = `¥${result.totalDiscountAmount.toLocaleString()}`;
+    totalDiscountAmountEl.textContent = `¥${result.totalAllDiscounts.toLocaleString()}`;
     
+    console.log('表示データ:', {
+        existingDiscount: result.existingDiscount,
+        totalDiscountAmount: result.totalDiscountAmount,
+        totalAllDiscounts: result.totalAllDiscounts
+    });    
     // 警告メッセージの表示
     if (result.showWarning) {
-        warningMessageEl.textContent = '【注意】 提案通りに値下げを行うと、廃棄＋値下げコストが売上目標の8%を超える可能性があります。';
+        warningMessageEl.textContent = '【注意】 合計値下げ額が売上目標の8%を超える可能性があります。';
         warningMessageEl.style.display = 'flex';
     } else {
         warningMessageEl.style.display = 'none';
