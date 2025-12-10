@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>グリーングルメ - 値下げ提案システム</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🥗 グリーングルメ 値下げ提案システム</h1>
+            <p class="business-hours">営業時間: 10:00 - 21:00</p>
+        </header>
+
+        <main>
+            <!-- 日時・天気入力セクション -->
+            <section class="input-section">
+                <h2>📅 日時・天気情報</h2>
+                
+                <div class="form-group">
+                    <label for="current-time">現在の時刻 (時):</label>
+                    <input type="number" id="current-time" min="10" max="21" value="18" required>
+                    <span>時</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="current-sales">現在の実績売上高 (円):</label>
+                    <input type="number" id="current-sales" min="0" value="150000" required>
+                    <span>円</span>
+                </div>
+
+                <div class="form-group">
+                    <label>天気:</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="weather" value="sunny" checked>
+                            晴れ ☀️
+                        </label>
+                        <label>
+                            <input type="radio" name="weather" value="rainy">
+                            雨 🌧️
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="day-of-week">曜日:</label>
+                    <select id="day-of-week">
+                        <option value="weekday">月～木</option>
+                        <option value="friday-saturday">金・土</option>
+                        <option value="sunday">日</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- 在庫入力セクション -->
+            <section class="input-section">
+                <h2>📦 在庫情報</h2>
+                
+                <div id="inventory-list">
+                    <!-- 在庫アイテムがここに追加されます -->
+                </div>
+
+                <div class="add-inventory-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-select">商品:</label>
+                            <select id="product-select">
+                                <option value="">商品を選択してください</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="quantity-input">残量 (100g単位):</label>
+                            <input type="number" id="quantity-input" min="0" max="30" value="5">
+                        </div>
+                        
+                        <button type="button" id="add-inventory-btn" class="btn-primary">➕ 在庫を追加</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 計算ボタン -->
+            <div class="action-section">
+                <button type="button" id="calculate-btn" class="btn-calculate">💡 値下げ提案を計算</button>
+            </div>
+
+            <!-- 結果表示エリア -->
+            <section class="result-section" id="result-section" style="display: none;">
+                <h2>📊 計算結果</h2>
+                
+                <!-- 合計情報 -->
+                <div class="summary-info">
+                    <div class="info-item">
+                        <span class="info-label">売上目標額:</span>
+                        <span class="info-value" id="sales-target">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">現在の在庫合計額:</span>
+                        <span class="info-value" id="inventory-total">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">提案値下げ額の合計:</span>
+                        <span class="info-value" id="discount-total">-</span>
+                    </div>
+                </div>
+
+                <!-- 警告メッセージ -->
+                <div id="warning-message" class="warning-message" style="display: none;"></div>
+
+                <!-- 提案リスト -->
+                <div class="proposals-container">
+                    <h3>💰 値下げ提案</h3>
+                    <div id="proposals-list">
+                        <!-- 提案がここに表示されます -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
