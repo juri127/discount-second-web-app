@@ -267,6 +267,19 @@ main {
     border-bottom: none;
 }
 
+.info-item.highlight {
+    background: #fff3e0;
+    padding: 15px;
+    margin: 10px -10px -10px -10px;
+    border-radius: 6px;
+    border: 2px solid #ff9800;
+}
+
+.info-item.highlight .info-value {
+    color: #ff6f00;
+    font-size: 20px;
+}
+
 .info-label {
     font-weight: 600;
     color: #555;

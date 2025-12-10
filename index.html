@@ -31,6 +31,12 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="existing-discount">既に値引きした金額 (円):</label>
+                    <input type="number" id="existing-discount" min="0" value="0" required>
+                    <span>円</span>
+                </div>
+
+                <div class="form-group">
                     <label>天気:</label>
                     <div class="radio-group">
                         <label>
@@ -101,8 +107,16 @@
                         <span class="info-value" id="inventory-total">-</span>
                     </div>
                     <div class="info-item">
+                        <span class="info-label">既に値引きした金額:</span>
+                        <span class="info-value" id="existing-discount-display">-</span>
+                    </div>
+                    <div class="info-item">
                         <span class="info-label">提案値下げ額の合計:</span>
                         <span class="info-value" id="discount-total">-</span>
+                    </div>
+                    <div class="info-item highlight">
+                        <span class="info-label">合計値下げ額:</span>
+                        <span class="info-value" id="total-discount-amount">-</span>
                     </div>
                 </div>
 
